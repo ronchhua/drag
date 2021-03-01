@@ -27,11 +27,11 @@ export default {
           y: 50,
           width: 100,
           height: 100,
-          circle: {
+          center: {
             x: 100,
             y: 100,
-            radius: 50,
           },
+          radius: 50,
           userClicked: false,
         },
 
@@ -49,12 +49,12 @@ export default {
     this.canvas.width = window.innerWidth;   // Why doesn't this work
     this.canvas.height = window.innerHeight;  // Why doesn't this work
 
-    this.drawCanvasElements();
+    this.initialDrawCanvasElements();
 
   },
   methods: {
 
-    drawCanvasElements() {
+    initialDrawCanvasElements() {
 
       this.canvas.beginPath();
 
@@ -68,20 +68,21 @@ export default {
     },
 
     // If a user clicks down, we check if it is clicking on one of our canvas elements.
+    // If it is within the bounds
 
     checkIfClickedElement(event) {
 
       this.mouse['x'] = event.offsetX;
       this.mouse['y'] = event.offsetY;
 
-      var circleElement = this.images[0].circle;
+      var circleCenterCoords = this.images[0].center;
 
-      var xDistance = (event.offsetX - circleElement.x);
-      var yDistance = (event.offsetY - circleElement.y);
+      var xDistance = (event.offsetX - circleCenterCoords.x);
+      var yDistance = (event.offsetY - circleCenterCoords.y);
 
       var distance = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 
-      if(distance <= circleElement['radius']) {
+      if(distance <= this.images[0].radius) {
         this.images[0].userClicked = true;
       }
 
@@ -100,11 +101,26 @@ export default {
 
       if(this.images[0].userClicked == true) {
 
-        var circleRadius = this.images[0].circle.radius;
+        var circleRadius = this.images[0].radius;
         var blueCircleImage = document.getElementById("blueCircle");
 
-        this.canvas.drawImage(blueCircleImage, mouseX-circleRadius, mouseY-circleRadius, this.images[0].width, this.images[0].height);
-        // try to align it so that the radius center of image is on the mouse
+        this.canvas.beginPath();
+
+        // Clear the initial placement of the image
+        this.canvas.clearRect(this.images[0].x-1, this.images[0].y-1, this.images[0].width+1, this.images[0].height+1);
+        
+        // While we move the image, we update it's coordinates to match the image moving with our mouse.
+        // Note the circle image is basically a square.
+
+        var circleImage = this.images[0];
+        circleImage.x = mouseX-circleRadius;  // The new circle image x-coord is basically the current mouse x-coord minus the radius, which is basically half the width.
+        circleImage.y = mouseY-circleRadius;  // The new circle image y-coord is basically the current mouse y-coord minus the radius, which is basically half the height.
+        circleImage.center['x'] = mouseX;  // The center x,y coords also change
+        circleImage.center['y'] = mouseY;
+
+        this.canvas.drawImage(blueCircleImage, mouseX-circleRadius, mouseY-circleRadius, circleImage.width, circleImage.height);
+
+        this.canvas.closePath();
       }
 
     },
