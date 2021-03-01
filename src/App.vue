@@ -33,10 +33,25 @@ export default {
           },
           radius: 50,
           userClicked: false,
+          attachedToRail: false,
         },
 
 
       ],
+      rail: {
+        x: 500,
+        y: 100,
+        width: 700,
+        height: 500,
+        components: [
+          { part: 'top', x1: 500, y1: 100, x2: 500+700, y2: 100 },
+          { part: 'left', x1: 500, y1: 100, x2: 500, y2: 100+500 },
+          { part: 'right', x1: 500+700, y1: 100, x2: 500+700, y2: 100+500 },
+          { part: 'bottom', x1: 500, y1: 100+500, x2: 500+700, y2: 100+500 },
+        ],
+
+
+      }
 
     }
   },
@@ -63,8 +78,17 @@ export default {
         this.canvas.drawImage(blueCircleImage, this.images[0].x, this.images[0].y, this.images[0].width, this.images[0].height);
       });
 
-      this.canvas.closePath();
+      this.drawRail();
 
+      this.canvas.closePath();
+      this.canvas.stroke();
+
+    },
+
+    drawRail() {
+      var rail = this.rail;
+      this.canvas.strokeRect(rail.x, rail.y, rail.width, rail.height);
+      this.canvas.fill();
     },
 
     // If a user clicks down, we check if it is clicking on one of our canvas elements.
@@ -107,18 +131,20 @@ export default {
         this.canvas.beginPath();
 
         // Clear the initial placement of the image
-        this.canvas.clearRect(this.images[0].x-1, this.images[0].y-1, this.images[0].width+1, this.images[0].height+1);
+        this.canvas.clearRect(this.images[0].x-3, this.images[0].y-3, this.images[0].width+3, this.images[0].height+3);
         
         // While we move the image, we update it's coordinates to match the image moving with our mouse.
         // Note the circle image is basically a square.
 
         var circleImage = this.images[0];
-        circleImage.x = mouseX-circleRadius;  // The new circle image x-coord is basically the current mouse x-coord minus the radius, which is basically half the width.
-        circleImage.y = mouseY-circleRadius;  // The new circle image y-coord is basically the current mouse y-coord minus the radius, which is basically half the height.
-        circleImage.center['x'] = mouseX;  // The center x,y coords also change
+        circleImage.x = mouseX-circleRadius;
+        circleImage.y = mouseY-circleRadius;
+        circleImage.center['x'] = mouseX;
         circleImage.center['y'] = mouseY;
 
         this.canvas.drawImage(blueCircleImage, mouseX-circleRadius, mouseY-circleRadius, circleImage.width, circleImage.height);
+
+        this.drawRail();
 
         this.canvas.closePath();
       }
@@ -130,10 +156,72 @@ export default {
 
     dropElement(event) {
 
+      this.mouse.x = event.offsetX;
+      this.mouse.y = event.offsetY;
+      var mouseX = this.mouse.x;
+      var mouseY = this.mouse.y;
+
+      if(this.images[0].userClicked) {
+        // Basically if the mouse x position + the radius is in the bounds of [x1-circle radius, x2+circle radius]
+
+        var rail = this.rail;
+        var circleRadius = this.images[0].radius;
+        var foundRail = false;
+
+        rail.components.forEach((comp) => {
+
+          //console.log(mouseX, comp.x1-circleRadius, mouseX, comp.x2+circleRadius, mouseY, comp.y1-circleRadius, mouseY, comp.y2+circleRadius);
+
+          if(mouseX >= comp.x1-circleRadius && mouseX <= comp.x2+circleRadius && mouseY >= comp.y1-circleRadius && mouseY <= comp.y2+circleRadius) {
+            
+            if(!foundRail) {
+
+              this.images[0].attachedToRail = true;
+
+              var blueCircleImage = document.getElementById("blueCircle");
+              this.canvas.beginPath();
+              this.canvas.clearRect(this.images[0].x-3, this.images[0].y-3, this.images[0].width+3, this.images[0].height+3);
+              
+              var circleImage = this.images[0];
+
+              if(comp.part == 'top' || comp.part == 'bottom') {
+                circleImage.x = mouseX-circleRadius;
+                circleImage.y = comp.y1-circleRadius;   // Could also be y2 because of same height
+                circleImage.center['x'] = mouseX;
+                circleImage.center['y'] = comp.y1;
+              }
+              else if(comp.part == 'left' || comp.part == 'right') {
+                circleImage.x = comp.x1-circleRadius;   // Could also be x2 because of same x pos
+                circleImage.y = mouseY-circleRadius;
+                circleImage.center['x'] = comp.x1;
+                circleImage.center['y'] = mouseY;
+              }
+
+              this.canvas.drawImage(blueCircleImage, circleImage.x, circleImage.y, circleImage.width, circleImage.height);
+
+              //We need to redraw the track because the clearRect() above would clear part of the track that the circle is dragged through
+              this.drawRail();
+
+              this.canvas.closePath();
+
+            }
+
+            foundRail = true; // Very likely that element is touching two components of the rail. Whichever one we iterate through first, we'll place it there.
+          }
+
+        });
+
+      }
+
       this.images[0].userClicked = false;
-      console.log(event);
       console.log('Mouse let go');
-    }
+
+      
+
+
+    },
+
+
 
 
   }
