@@ -180,7 +180,8 @@ export default {
             
             var circleImage = this.images[0];
 
-            if(comp.part == 'top' || comp.part == 'bottom') {
+            //Corners have a bit of issues
+            if(comp.part == 'top' || comp.part == 'bottom') { 
               this.changeCircleLocation(mouseX-circleRadius, comp.y1-circleRadius, mouseX, comp.y1);
             }
             else if(comp.part == 'left' || comp.part == 'right') {
