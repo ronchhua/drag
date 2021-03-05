@@ -48,9 +48,9 @@ export default {
         width: 700,
         height: 500,
         components: [
-          { part: 'top', x1: 500, y1: 100, x2: 500+700, y2: 100 },
           { part: 'left', x1: 500, y1: 100, x2: 500, y2: 100+500 },
           { part: 'right', x1: 500+700, y1: 100, x2: 500+700, y2: 100+500 },
+          { part: 'top', x1: 500, y1: 100, x2: 500+700, y2: 100 },
           { part: 'bottom', x1: 500, y1: 100+500, x2: 500+700, y2: 100+500 },
         ],
 
@@ -210,31 +210,20 @@ export default {
           this.drawRail();
           this.canvas.closePath();
         }
-
       }
 
       this.images[0].userClicked = false;
-      console.log('Mouse let go');
-
-      
-
 
     },
 
     changeCircleLocation(x, y, centerX, centerY) {
-
       var circleImage = this.images[0];
       circleImage.x = x;
       circleImage.y = y;
       circleImage.center['x'] = centerX;
       circleImage.center['y'] = centerY;
     }
-
-
-
-
-  }
-
+  },
 
 }
 </script>
@@ -246,20 +235,16 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-
   margin: 0px;
   padding: 0px;
-
 }
 
 #canvas-container {
   position:absolute;  /* Specify position, top and left to not have a scrollbar */
   top: 0; left: 0;
-
   /*
    width: 100%;     Messes up image sizes. The canvas simply shows the image stretched to the full viewport
    height: 100vh;   This just messes with the dimensions of the DOM elements
   */
-
 }
 </style>
